@@ -1,23 +1,36 @@
 import { useContext, useEffect, useState } from "react";
-import Button from "../component/Button";
-import StrangersList from "../component/StrangersList"
-import { FaSearch } from "react-icons/fa";
-import { fetchEveryone } from "../api/api";
-import AuthenticationContext from "../context/authContext";
+
 import { person } from "../types/person.types";
 import Stranger from "../component/Stranger";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAuth from "../hooks/useAuth";
+import BackButton from "../component/BackButton";
+import { useNavigate } from "react-router-dom";
 
 const FindPeople = () =>{
     const [strangers,setStrangers] = useState<person[]>();
-    const  {auth} = useContext(AuthenticationContext);
+    const  {auth} = useAuth();
     const [username, setUsername] = useState<string>('');
     const [filteredUsers, setFilteredUsers] = useState<any>([]);
+    const axiosPrivate = useAxiosPrivate();
+    const navigate = useNavigate();
 
     useEffect(()=>{
-        fetchEveryone(auth.accessToken).then(data=>{
-            setStrangers(data);
-            console.log(data);
-        })
+        const fetchEveryone = async () =>{
+            try{
+                const response =  axiosPrivate.get('/users',{
+                    headers:{
+                        'Authorization': `Bearer ${auth.accessToken}` 
+                    }
+                });
+
+                setStrangers((await response).data)
+            }catch(error){
+                console.log(error)
+            }
+        }
+        fetchEveryone();
+   
     },[])
 
     const handleUsernameChange =(e:React.ChangeEvent<HTMLInputElement>) =>{
@@ -39,9 +52,10 @@ const FindPeople = () =>{
      },[username])
 
 
-    return (<div>
-        <h4>Search users</h4>
-        <input onChange={handleUsernameChange} value={username} type="text" placeholder={`Search`}></input>
+    return (<div className="flex flex-col bg-gray-400 items-center h-screen ">
+        <BackButton mobileOnly={false} onCLick={()=>navigate('/app')}/>
+        <h2 className="m-5">Search users</h2>
+        <input className="bg-gray-800 w-72 rounded-md p-3 text-white" onChange={handleUsernameChange} value={username} type="text" placeholder={`Search`}></input>
 
 
         {filteredUsers?.map((user: person) => (

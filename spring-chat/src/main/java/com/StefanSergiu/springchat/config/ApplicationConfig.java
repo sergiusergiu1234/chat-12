@@ -10,8 +10,10 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -62,6 +64,7 @@ public class ApplicationConfig {
     }
 
     @Bean
+    @Primary
     JwtEncoder accessTokenEncoder() {
         JWK jwk = new RSAKey.Builder(keyUtils.getAccessTokenPublicKey())
                 .privateKey(keyUtils.getAccessTokenPrivateKey())
@@ -70,8 +73,24 @@ public class ApplicationConfig {
         return new NimbusJwtEncoder(immutableSecret);
     }
     @Bean
+    @Primary
     JwtDecoder accessTokenDecoder(){
         return NimbusJwtDecoder.withPublicKey(keyUtils.getAccessTokenPublicKey()).build();
+    }
+
+    @Bean
+    @Qualifier("refreshTokenEncoder")
+    JwtEncoder refreshTokenEncoder() {
+        JWK jwk = new RSAKey.Builder(keyUtils.getRefreshTokenPublicKey())
+                .privateKey(keyUtils.getRefreshTokenPrivateKey())
+                .build();
+        JWKSource<SecurityContext> immutableSecret = new ImmutableJWKSet<>(new JWKSet(jwk));
+        return new NimbusJwtEncoder(immutableSecret);
+    }
+    @Bean
+    @Qualifier("refreshTokenDecoder")
+    JwtDecoder refreshTokenDecoder(){
+        return NimbusJwtDecoder.withPublicKey(keyUtils.getRefreshTokenPublicKey()).build();
     }
 
 

@@ -35,32 +35,37 @@ public class WebSocketAuthInterceptorAdapter implements ChannelInterceptor {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final Set<String> authenticatedConnections = new HashSet<>();
+
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         final StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         StompCommand cmd = accessor.getCommand();
-        if (StompCommand.CONNECT == cmd && !authenticatedConnections.contains(accessor.getSessionId())) {
-
-            String jwtToken = accessor.getFirstNativeHeader("Authorization");
-            if (jwtToken != null && jwtToken.startsWith("Bearer ")) {
-                jwtToken = jwtToken.substring(7);
-                String username = jwtService.extractUsername(jwtToken);
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                if (jwtService.isTokenValid(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities()
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    accessor.setUser(authenticationToken);
-                    authenticatedConnections.add(accessor.getSessionId());
-                } else {
+        if (StompCommand.CONNECT == cmd) {
+            final String authHeader = accessor.getFirstNativeHeader("Authorization");
+            final String jwt;
+            final String username;
+            System.out.println(authHeader);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
+                username = jwtService.extractUsername(jwt);
+                if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                    //get the UserDetails object based on the extracted username for validation
+                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                    if(jwtService.isTokenValid(jwt,userDetails)){
+                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                userDetails,null,userDetails.getAuthorities()
+                        );
+                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        accessor.setUser(authenticationToken);
+                    }
+                }else  {
                     throw new MessagingException("Invalid JWT token");
                 }
             } else {
-                throw new MessagingException("Invalid JWT token");
+                throw new MessagingException("Invalid JWT token or missing");
             }
         }
         return message;
     }
+
 }

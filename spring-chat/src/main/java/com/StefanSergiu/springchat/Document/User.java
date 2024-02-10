@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Document
+@Getter
 @Data
 @Builder
 @AllArgsConstructor
@@ -40,6 +41,10 @@ public class User implements UserDetails {
     public String addContact (String id){
         this.contacts.add(id);
         return id;
+    }
+
+    public void removeConversation(String conversationId){
+        this.conversations.remove(conversationId);
     }
 
     public void addConversation(Conversation conversation){

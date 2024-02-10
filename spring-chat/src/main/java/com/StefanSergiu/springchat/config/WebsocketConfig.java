@@ -22,6 +22,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -36,6 +38,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
     @Configuration
     @EnableWebSocketMessageBroker
     @RequiredArgsConstructor
+    @CrossOrigin(origins = "http://localhost:3000")
     @Order(HIGHEST_PRECEDENCE + 99)
     public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
@@ -58,6 +61,9 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
             registration.interceptors(authInterceptorAdapter);
             WebSocketMessageBrokerConfigurer.super.configureClientInboundChannel(registration);
         }
+
+
+
 
     }
 

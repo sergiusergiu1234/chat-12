@@ -24,7 +24,7 @@ public class Conversation {
 
     //references to participants of conversations
     @NonNull
-    private Set<UserDTO> participants;
+    private List<UserDTO> participants;
 
     //list of message references
     private Set<String> messageIds = new HashSet<>();;
@@ -36,5 +36,9 @@ public class Conversation {
     public String addMessage(String messageId){
         this.messageIds.add(messageId);
         return  messageId;
+    }
+
+    public void removeParticipant(UserDTO user){
+        this.participants.remove(user);
     }
 }

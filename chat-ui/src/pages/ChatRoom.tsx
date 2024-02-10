@@ -1,57 +1,36 @@
-import { useContext, useEffect, useState } from "react";
-import { Client, Message, over } from 'stompjs';
-import SockJS from "sockjs-client";
-import { message } from "../types/message.types";
-import AuthContext, { } from "../context/authContext";
 import ConversationsList from "../component/ConversationsList";
-import FriendsList from "../component/FriendsList";
-// import FriendRequestsList from "../component/FriendRequestsList";
-import StrangersList from "../component/StrangersList";
 import Navbar from "../component/Navbar";
+import ConversationRoom from "../component/ConversationRoom";
 import { useWebSocket } from "../context/WebSocketContext";
-import MessageList from "../component/MessageList";
+import { conversation } from "../types/conversation.types";
+
 const ChatRoom = () => {
-    const { auth} = useContext(AuthContext);
+  
+  const { activeConversation, conversations } = useWebSocket();
 
-    const {sendMessage} = useWebSocket();
-
-    const [message, setMessage] = useState<message>({
-       
-        senderName: auth.username,
-        content: "",
-        senderId:""
-    });
-    const handleMessageChange = (event: any) => {
-        const { value } = event.target;
-        setMessage({
-             
-            senderName: auth.username,
-            content: value,
-            senderId: auth.userId
-        });
-    }
-
-    return (<div className="chatroom-container">
-        <Navbar />
-        <div className="chat-box">
+  return (
+    <div className="h-screen w-screen">
+      
+      <div className=" flex flex-row ">
+        <div className={`flex flex-col w-1/4 min-w-80 h-screen sticky ${activeConversation ? 'maxsm:hidden': 'maxsm:w-full'}`}>
+          <Navbar />
+          {/* Conversation List */}
+          <div className={`h-full bg-gray-600 flex flex-col overflow-y-auto custom-scrollbar  ${activeConversation ? 'maxsm:hidden' : 'maxsm:w-full'} `}>
             <ConversationsList />
-            <div className="chat-content">
-                <ul className="chat-messages">
-                    <MessageList/>
-                </ul>
-                <div className="send-message">
-                    <input
-                        name="message"
-                        type="text"
-                        className="input-message"
-                        placeholder="enter the public message"
-                        value={message.content}
-                        onChange={handleMessageChange} />
-                    <button type="button" className="send-button" onClick={()=>sendMessage(message)}>send</button>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>)
-}
+        
+
+        {/* Conversation Room */}
+        <div className={`bg-chatroom-pattern   h-screen bg-cover flex flex-col justify-center items-center w-3/4 maxsm:w-full ${activeConversation ? 'maxsm:w-screen' : 'maxsm:hidden'} `}>
+          <ConversationRoom conversation={conversations?.find((conv:conversation)=>{
+           return conv.id === activeConversation
+          })} />
+        </div>
+
+      </div>
+    </div>
+  );
+};
 
 export default ChatRoom;

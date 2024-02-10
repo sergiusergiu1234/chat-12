@@ -1,64 +1,65 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
+import useAuth from "../hooks/useAuth";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { person } from "../types/person.types";
-import AuthenticationContext from "../context/authContext";
-import { friendRequest } from "../types/friendRequest.types";
-import {  cancelFriendRequest } from "../api/api";
 
-interface FriendRequestInterface {
-    friendRequestData:friendRequest
+interface RequestProps{
+    requestData:person;
 }
 
-const FriendRequest:React.FC<FriendRequestInterface> = ({friendRequestData}) =>{
-    // const {auth} = useContext(AuthenticationContext);
-    // const [active,setActive] = useState<boolean>(true);
-    // const [accepted,setAccepted] = useState<boolean>(false);
-    // const cancelSentRequest = () =>{
-    //     cancelFriendRequest(friendRequestData.receiver.id,auth.accessToken).then(data =>{
-    //         if(data.status == 200){
-    //             setActive(false);
-    //         }
-    //     })
-    // }
-    // useEffect(()=>{
-    //     console.log(friendRequestData)
-    // },[])
-    // const declineRequest = () =>{
-    //     cancelFriendRequest(friendRequestData.sender.id,auth.accessToken).then(data =>{
-    //         if(data.status == 200){
-    //             setActive(false);
-    //         }
-    //     })
-    // }
+const FriendRequest:React.FC<RequestProps> = ({requestData}) =>{
+    const {auth} = useAuth();
+    const axiosPrivate = useAxiosPrivate();
+    const [info,setInfo] = useState<person>(requestData);
+    const [finalMessage, setFinalMessage] = useState<string>('');
+    const handleAcceptRequest = async () =>{
+        try{
+            const response = axiosPrivate.post(`/sendFriendRequest/${requestData.id}`,{},{
+                   headers:{
+                       'Authorization': `Bearer ${auth.accessToken}`
+                   }
+               })
+               const data =(await response).data;
+                setInfo((prevState) => ({
+                 ...prevState,
+                 request: data.request
+               }));
+               setFinalMessage("Request accepted")
+           }catch(error){
+               console.log(error)
+           }
+    }
 
-    // const acceptRequest =  () =>{
-    //     acceptFriendRequest(friendRequestData.requestId, auth.accessToken).then(data=>{
-    //         if(data.status == 200){
-    //             setActive(false);
-    //             setAccepted(true);
-    //         }
-    //     })
-    // }
+  const handleDeclineFriendRequest = (id: string) =>{
+        // cancelFriendRequest(id,auth.accessToken).then(data =>{
+        //     if(data.status == 200){
+        //         console.log(data.message);
+        //         setFriendRequests((prev)=>
+        //             prev.filter((request)=> request.id !== id)
+        //         )
+        //     }
+        // })
+    }
+
 
     return (<div>
-        {/* {auth.userId === friendRequestData.receiver.id
-         ?
-             <>
-             <label>{friendRequestData.sender.username}</label>
-             <img alt={`image of user ${friendRequestData.sender.id}`}></img>
-             {accepted ? <label>Accepted</label> : <>
-             {active ? <>
-                <button onClick={acceptRequest}>Accept</button>
-             <button disabled={!active} onClick={declineRequest}>{active ? "Decline" : "Declined"} </button></> : <label>Declined</label>}
-             </> }
-             
-             
-             </>
-              : 
-              <>
-              <label>{friendRequestData.receiver.username}</label>
-              <img alt={`image of user ${friendRequestData.receiver.id}`}></img>
-              <button disabled={!active} onClick={cancelSentRequest}>{active ? "Cancel request" : "canceled"}</button>
-              </>} */}
+    <div className="flex flex-row bg-gray-500 rounded-xl maxsm:w-5/6">
+                <label key={requestData.id} className="text-white m-5">
+                    Request from: {requestData.username}
+                    </label>
+                    {finalMessage === '' ?  <div >
+                        <button className="w-20 h-8 bg-green-700 m-5 rounded-md hover:bg-green-800"
+                        onClick={handleAcceptRequest}>
+                        Accept
+                    </button>
+                    <button className="w-20 h-8 bg-red-700 m-5 rounded-md hover:bg-red-800"
+                        onClick={()=>handleDeclineFriendRequest(requestData.id)}>
+                        Decline
+                    </button>
+                    </div> : <label className=" flex items-center p-2">{finalMessage}</label>}
+                   
+                
+                </div>
     </div>)
 }
 

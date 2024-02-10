@@ -1,22 +1,22 @@
 import { useContext, useEffect, useState } from "react";
-import { createConversation, fetchEveryone, fetchFriends } from "../api/api";
+
 import AuthenticationContext from "../context/authContext";
 import { person } from "../types/person.types";
 import Friend from "./Friend";
-import Button from "./Button";
+
 
 
 
 
 const FriendsList = () => {
-    const { auth } = useContext(AuthenticationContext);
+
     const [friends, setFriends] = useState<person[]>([])
-    const [checkedFriends, setCheckedFriends] = useState<string[]>([auth.userId]);
+
     
     useEffect(() => {
-        fetchFriends(auth.accessToken).then(data => {
-            setFriends(data)
-        })
+        // fetchFriends(auth.accessToken).then(data => {
+        //     setFriends(data)
+        // })
     }, []);
 
 

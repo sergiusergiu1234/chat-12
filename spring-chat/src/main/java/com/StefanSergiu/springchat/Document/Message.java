@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -22,8 +23,8 @@ public class Message {
     private String senderName;
     @NonNull
     private String content;
-//    @NonNull
-//    private LocalDateTime timestamp;
+    @NonNull
+    private LocalDateTime timestamp;
 
 
     public static Message from(MessageDTO messageDTO){
@@ -31,6 +32,7 @@ public class Message {
         message.setContent(messageDTO.getContent());
         message.setSenderName(messageDTO.getSenderName());
         message.setSenderId(messageDTO.getSenderId());
+
         return message;
     }
 }

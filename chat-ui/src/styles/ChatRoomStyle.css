@@ -1,0 +1,46 @@
+.chat-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
+.conversationList-container{
+    min-width: 200px;
+    width: 20vw;
+    background-color: rgb(211, 211, 211);
+    height: 90vh;
+}
+.chat-content{
+    width: 70vw;
+}
+
+.return{
+    display: none;
+}
+.send-message{
+    position: absolute;
+    top:95vh;
+}
+.conversation-content{
+    height: 80vh;
+}
+
+.message_list{
+    display: flex;
+    flex-direction: column;
+}
+@media screen and (max-width: 500px){
+
+    .return{
+        display: flex;
+    }
+    .conversationInactive{
+        display: none;
+    }
+
+    .conversationList-container{
+        width: 100vw;
+    }
+   .conversationActive{
+    display: none;
+   }
+}

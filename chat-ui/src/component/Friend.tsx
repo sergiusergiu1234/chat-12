@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { person } from "../types/person.types";
-import Button from "./Button";
 
 interface FriendProps {
     friendData: person;
@@ -9,11 +8,10 @@ interface FriendProps {
 
 const Friend:React.FC<FriendProps> = ({friendData}) =>{
 
-    return (<div>
-
-        <label>{friendData.username}</label>
-      <img alt={`profilePhoto of ${friendData.username}`} ></img>
-
+    return (<div className="flex flex-row items-center  p-1 ">
+        
+      <img className="rounded-3xl w-10 h-10 border-solid bg-white object-cover m-2" alt={`profilePhoto of ${friendData.username}`} ></img>
+      <label className="text-lg ">{friendData.username}</label>
     </div>)
 }
 

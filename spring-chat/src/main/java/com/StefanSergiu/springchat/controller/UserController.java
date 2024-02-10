@@ -3,11 +3,9 @@ import com.StefanSergiu.springchat.Document.Conversation;
 import com.StefanSergiu.springchat.Document.User;
 import com.StefanSergiu.springchat.dto.ConversationDto;
 import com.StefanSergiu.springchat.dto.NewConversationDTO;
-import com.StefanSergiu.springchat.dto.SimpleRequestModel;
 import com.StefanSergiu.springchat.dto.UserDTO;
 import com.StefanSergiu.springchat.repository.UserRepository;
 import com.StefanSergiu.springchat.service.ConversationService;
-import com.StefanSergiu.springchat.service.FriendshipService;
 import com.StefanSergiu.springchat.service.RequestService;
 import com.StefanSergiu.springchat.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,7 @@ private final UserRepository userRepository;
 private final UserService userService;
 private final ConversationService conversationService;
 private final RequestService requestService;
-private final FriendshipService friendshipService;
+
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllUsers(){
         //get users list
@@ -36,7 +34,8 @@ private final FriendshipService friendshipService;
         if(loggedUser != null){
            for(User user: users){
                UserDTO userDTO = UserDTO.from(user);
-               userDTO.setRequest(SimpleRequestModel.from(requestService.findBySenderAndReceiver(loggedUser.getId(),user.getId())));
+               //to see if we sent/received a friend request to/from this user
+               userDTO.setRequest(requestService.findBySenderAndReceiver(loggedUser.getId(),user.getId()));
                userDTO.setFriends(loggedUser.getContacts().contains(user.getId()));
                userDTOs.add(userDTO);
            }
@@ -78,4 +77,6 @@ private final FriendshipService friendshipService;
         List<ConversationDto> conversationList = conversationService.getConversations(user);
         return new ResponseEntity<>(conversationList,HttpStatus.OK);
     }
+
+
 }

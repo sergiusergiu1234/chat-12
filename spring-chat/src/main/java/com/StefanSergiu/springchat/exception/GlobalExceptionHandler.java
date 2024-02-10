@@ -3,9 +3,10 @@ package com.StefanSergiu.springchat.exception;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.BadJwtException;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -31,12 +32,14 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
-    @ExceptionHandler({ExpiredJwtException.class})
-    public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException exception){
+    @ExceptionHandler({InvalidJwtException.class})
+    public ResponseEntity<Object> handleExphigowtException(InvalidJwtException exception){
+        System.out.println("Handling InavlidJwtException: " + exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(exception.getMessage());
     }
+
 
     @ExceptionHandler({FriendRequestToSelfException.class})
     public ResponseEntity<Object> handleFriendRequestToSelfException(FriendRequestToSelfException exception){

@@ -1,6 +1,8 @@
 package com.StefanSergiu.springchat.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -14,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -31,7 +34,7 @@ public class SecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http
                     .authorizeHttpRequests((authorize)-> authorize
-                            .requestMatchers("/api/v1/auth/**","/user","/chat/**").permitAll()
+                            .requestMatchers("/api/v1/auth/**","/user","/chat/**","/api/v1/auth/refresh-token").permitAll()
                               .anyRequest().authenticated())
 
                     .csrf(AbstractHttpConfigurer::disable)
@@ -44,6 +47,7 @@ public class SecurityConfig {
                     .authenticationProvider(authenticationProvider)
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
                     .exceptionHandling(ex -> ex.authenticationEntryPoint((new BearerTokenAuthenticationEntryPoint()))
                             .accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
 

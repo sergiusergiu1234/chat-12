@@ -24,15 +24,25 @@ import java.util.function.Function;
 public class JwtService {
 
     private final JwtEncoder jwtEncoder;
-
+    private final JwtEncoder refreshTokenEncoder;
     public String generateToken(UserDetails userDetails) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
-                .expiresAt(now.plus(1, ChronoUnit.HOURS))
+                .expiresAt(now.plus(20, ChronoUnit.SECONDS))
                 .subject(userDetails.getUsername())
                 .build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+
+    public String generateRefreshToken(UserDetails userDetails){
+        Instant now = Instant.now();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuedAt(now)
+                .expiresAt(now.plus(1, ChronoUnit.DAYS))
+                .subject(userDetails.getUsername())
+                .build();
+        return this.refreshTokenEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
     public JWTClaimsSet extractAllClaims (String token){
@@ -52,9 +62,10 @@ public class JwtService {
         return extractClaim(token, JWTClaimsSet::getSubject);
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails){
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+
     }
 
     public boolean isTokenExpired(String token){

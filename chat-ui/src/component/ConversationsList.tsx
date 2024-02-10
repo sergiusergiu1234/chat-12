@@ -1,20 +1,47 @@
 import { useContext, useEffect, useState } from "react";
 import Conversation from "./Conversation";
-import AuthenticationContext from "../context/authContext";
 import { useWebSocket } from "../context/WebSocketContext";
 
-const ConversationsList = () =>{
-    const {auth} = useContext(AuthenticationContext);
-    const {setActiveConversation,conversations, fetchConversations} = useWebSocket();
+import { conversation } from "../types/conversation.types";
 
-    useEffect(()=>{
-        fetchConversations();
-    },[])
 
-    return (<div>
-        <h4>Conversations list</h4>
-        {conversations?.map(conv => <div key={conv.id}><Conversation selectConversation={()=>setActiveConversation(conv.id)} conversation={conv}/></div>)}
-    </div>)
-}
+
+const ConversationsList = () => {
+
+  const { setActiveConversation, conversations, fetchConversations , searchVal } =useWebSocket();
+
+  useEffect(() => {
+    fetchConversations()   
+  }, []);
+
+  const [filteredConversations, setFilteredConversations] = useState<conversation[]>(conversations);
+
+
+  useEffect(()=>{
+    if(searchVal !== undefined){
+      setFilteredConversations(conversations.filter((conv)=>{
+        return conv.name?.includes(searchVal);
+      }))
+    }else{
+      setFilteredConversations(conversations);
+    }
+  },[searchVal,conversations])
+
+  return (
+    <div className="flex flex-col">
+
+      {filteredConversations?.map((conv) => (
+        <Conversation
+          key={conv.id}
+          selectConversation={() =>{
+              conv.name && localStorage.setItem('activeConvName', conv.name);
+              console.log(conv)
+              setActiveConversation(conv.id)}}
+          conversation={conv}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default ConversationsList;

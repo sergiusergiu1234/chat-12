@@ -1,0 +1,7 @@
+package com.StefanSergiu.springchat.exception;
+
+public class InvalidJwtException extends RuntimeException{
+
+    public InvalidJwtException(String message){ super(message);}
+}
+

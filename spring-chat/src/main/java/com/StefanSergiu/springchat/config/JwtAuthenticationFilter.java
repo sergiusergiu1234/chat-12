@@ -1,11 +1,17 @@
 package com.StefanSergiu.springchat.config;
 
+import com.StefanSergiu.springchat.exception.InvalidJwtException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.oauth2.sdk.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,19 +47,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         //extract username from JWT token;
         username = jwtService.extractUsername(jwt);
 
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            //get the UserDetails object based on the extracted username for validation
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            if(jwtService.isTokenValid(jwt,userDetails)){
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,null,userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                //get the UserDetails object based on the extracted username for validation
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+                if(jwtService.isTokenValid(jwt,userDetails)){
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,null,userDetails.getAuthorities()
+                    );
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
+
             }
-        }
-        filterChain.doFilter(request,response);
+
+            filterChain.doFilter(request,response);
     }
 }

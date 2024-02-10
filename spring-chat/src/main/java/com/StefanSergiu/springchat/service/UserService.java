@@ -23,7 +23,6 @@ public class UserService {
 
 
    private final UserRepository  userRepository;
-    private final FriendshipService friendshipService;
 private final ConversationService conversationService;
     private final RequestRepository requestRepository;
 
@@ -59,7 +58,7 @@ private final ConversationService conversationService;
         }
         existingRequest = requestRepository.findBySenderAndReceiver(receiverId, loggedUser.getId());
         if (existingRequest != null) {
-            // Call a method to accept the existing friend request (replace with your logic)
+
             acceptFriendRequest(existingRequest,receiver,loggedUser);
             return existingRequest;
         }
@@ -85,11 +84,14 @@ private final ConversationService conversationService;
     }
 
     public List<Request> getReceivedFriendRequests(User user){
-
         return requestRepository.findByReceiver(user.getId());
     }
 
     public List<Request> getSentFriendRequests(User user) {
         return requestRepository.findBySender(user.getId());
+    }
+
+    public User findUserById(String userId) {
+        return userRepository.findById(userId).orElseThrow();
     }
 }

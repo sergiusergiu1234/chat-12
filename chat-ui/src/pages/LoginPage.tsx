@@ -1,71 +1,87 @@
-import React, { useContext, useEffect, useState } from 'react';
-import AuthenticationContext, { AuthenticationContextProvider } from '../context/authContext';
-import { useNavigate } from 'react-router-dom';
+import React, {useState } from "react";
+
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "../api/axios";
+import useAuth from "../hooks/useAuth";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/"
+  const { setAuth } = useAuth();
 
-    const navigate = useNavigate();
-    const {auth,setAuth} = useContext(AuthenticationContext);
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-    const [username,setUsername] = useState<string>("");
-    const [password,setPassword] = useState<string>("");
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-          console.log('submitted');
-          const data = await loginResponse();
-          console.log(data.userId)
-          setAuth({username:  data.username, accessToken: data.token, refreshToken:"", userId: data.userId});
-          localStorage.setItem("access",data.token);
-          localStorage.setItem("username",data.username);
-          localStorage.setItem("userId", data.userId);
-          navigate("/app");
-        } catch (error) {
-          console.error('Error:', error);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "/api/v1/auth/authenticate",
+        JSON.stringify({ username, password }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      };
+      );
+      console.log(response.data);
+      const accessToken = response?.data?.accessToken;
+      const refreshToken = response?.data?.refreshToken;
 
-  const loginResponse = async () => {
-    const response = await fetch("http://localhost:8080/api/v1/auth/authenticate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: username,
-        password: password
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      setAuth({username:  response.data.username || '', userId: response.data.userId || '', accessToken:accessToken, refreshToken:refreshToken})
+      navigate(from, {replace:true });
+    } catch (error) {
+      console.error("Error when login:", error);
     }
-
-    return response.json();
   };
 
+ 
 
-  const handleUsernameChange =(e:React.ChangeEvent<HTMLInputElement>) =>{
-    setUsername(e.currentTarget.value)
-  }
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.currentTarget.value);
+  };
 
-  const handlePasswordChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
-    setPassword(e.currentTarget.value)
-  }
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.currentTarget.value);
+  };
   return (
-    
-                <div>
-        {auth.accessToken !== '' && <label>helo </label>}
-      <h1>Login page</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Username</label>
-        <input type="text" value={username} onChange={handleUsernameChange}/>
-        <label>Password</label>
-        <input type="password" value={password} onChange={handlePasswordChange}/>
-        <button type="submit" >Submit</button>
-        <a href='/register'>Register</a>
+    <div className=" flex flex-col justify-center  bg-gray-200 h-screen w-screen">
+      <form onSubmit={handleSubmit} className="flex flex-col ">
+        <div className="flex items-center justify-center flex-col mt-10">
+          <label className="text-xl">Username</label>
+          <input
+            className=" rounded-xl border-solid border-2 p-2 w-2/6 maxsm:w-5/6 mb-5"
+            type="text"
+            value={username}
+            onChange={handleUsernameChange}
+          />
+        </div>
+
+        <div className="flex items-center justify-center flex-col mt-10">
+          <label className="text-xl">Password</label>
+          <input
+            className=" rounded-xl border-solid border-2 p-2 w-2/6 maxsm:w-5/6 mb-5"
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="text-2xl bg-green-900 w-1/6 maxsm:w-32 rounded-md border-2 border-solid border-black self-center hover:bg-green-700"
+        >
+          Submit
+        </button>
+        <a
+          href="/register"
+          className="text-blue-500 underline hover:text-blue-900 w-1/6 maxsm:w-32 self-center"
+        >
+          Register
+        </a>
       </form>
     </div>
-
   );
 };
 

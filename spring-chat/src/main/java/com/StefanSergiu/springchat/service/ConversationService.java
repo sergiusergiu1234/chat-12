@@ -14,9 +14,13 @@ import com.StefanSergiu.springchat.repository.ConversationRepository;
 import com.StefanSergiu.springchat.repository.MessageRespository;
 import com.StefanSergiu.springchat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -28,6 +32,8 @@ public class ConversationService {
     UserRepository userRepository;
     @Autowired
     MessageRespository messageRespository;
+
+
     @Transactional
     public Conversation createConversation(NewConversationDTO newConversationDTO){
         Conversation conversation = new Conversation();
@@ -38,7 +44,7 @@ public class ConversationService {
         }else{
             conversation.setName(null);
         }
-        Set<UserDTO> participants = new HashSet<>(newConversationDTO.getParticipants());
+        List<UserDTO> participants = new ArrayList<>(newConversationDTO.getParticipants());
         conversation.setParticipants(participants);
         conversationRepository.save(conversation);
         for(UserDTO u: participants){
@@ -56,7 +62,7 @@ public class ConversationService {
         conversation.setIsGroupChat(false);
 
         // Set participants for the private conversation
-        Set<UserDTO> participants = new HashSet<>();
+        List<UserDTO> participants = new ArrayList<>();
         participants.add(UserDTO.from(user1));
         participants.add(UserDTO.from(user2));
         conversation.setParticipants(participants);
@@ -81,10 +87,8 @@ public class ConversationService {
             Conversation conversation = conversationRepository.findById(id)
                     .orElseThrow(()->new ConversationNotFoundException("Conversation not found  with id " + id));
             ConversationDto conversationDto = ConversationDto.from(conversation);
-           for(String messageId : conversation.getMessageIds()){
-               Optional<Message> message = messageRespository.findById(messageId);
-               conversationDto.addMessage(message);
-           }
+            List<Message> messages = messageRespository.findAllById(conversation.getMessageIds());
+            conversationDto.setMessages(messages);
            response.add(conversationDto);
         }
         return response;
@@ -92,7 +96,10 @@ public class ConversationService {
     public Message saveMessage(MessageDTO messageDTO, String conversationId){
         System.out.println(messageDTO.getContent());
         Message newMessage = Message.from(messageDTO);
+        newMessage.setTimestamp(LocalDateTime.now());
+
         messageRespository.save(newMessage);
+        System.out.println(newMessage.getTimestamp());
         Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(()->
                 new ConversationNotFoundException("Conversation with id "+conversationId +" not found"));
         conversation.addMessage(newMessage.getId());
@@ -101,4 +108,32 @@ public class ConversationService {
     }
 
 
+    @Transactional
+    public boolean leaveConversation(String conversationId, String userId) {
+        Optional<Conversation> optionalConversation = conversationRepository.findById(conversationId);
+        Optional<User> userOptional = userRepository.findById(userId);
+        User user = userOptional.get();
+        if(optionalConversation.isPresent()){
+            Conversation conversation = optionalConversation.get();
+            UserDTO userToRemove = findParticipantById(conversation.getParticipants(),userId);
+            if(userToRemove != null){
+                conversation.removeParticipant(userToRemove);
+                conversationRepository.save(conversation);
+                user.removeConversation(conversationId);
+                userRepository.save(user);
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private UserDTO findParticipantById(List<UserDTO> participants, String userId) {
+
+        return participants.stream()
+                .filter(userDTO -> userId.equals(userDTO.getId()))
+                .findFirst()
+                .orElse(null);
+    }
 }
