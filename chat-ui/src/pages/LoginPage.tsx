@@ -15,6 +15,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.clear();
     try {
       const response = await axios.post(
         "/api/v1/auth/authenticate",
