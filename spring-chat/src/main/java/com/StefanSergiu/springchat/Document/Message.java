@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document
 @Data
@@ -24,8 +26,10 @@ public class Message {
     @NonNull
     private String content;
     @NonNull
-    private LocalDateTime timestamp;
+    private String timestamp;
 
+    //id's of users who have seen the message
+    private List<String> seenBy = new ArrayList<>();
 
     public static Message from(MessageDTO messageDTO){
         Message message = new Message();
@@ -34,5 +38,11 @@ public class Message {
         message.setSenderId(messageDTO.getSenderId());
 
         return message;
+    }
+
+    public void addSeenBy(String userId){
+        if(!seenBy.contains(userId)) {
+            this.seenBy.add(userId);
+        }
     }
 }

@@ -10,23 +10,21 @@ import { useWebSocket } from "../context/WebSocketContext";
 
 
 
-const ConversationMenu = ({id,name,participants}:conversation) => {
+const ConversationMenu = ({id,name,participants,isGroupChat}:conversation) => {
     // const {auth} = useContext(AuthenticationContext);
     const [toggle,setToggle] = useState(false);
     const [toggleParticipants, setToggleParticipants] = useState<boolean>(false);
-    const {leaveConversation} = useWebSocket();
+
     const ref=useClickOutside(()=>{
         setToggle(false);
     })
 
     const handleLeaveGroup = () =>{
-        leaveConversation(id)
+       
     }
 
-
- 
-
-    return (<div ref={ref}>
+    return (<>
+    {isGroupChat && <div ref={ref}>
         <button onClick={()=>setToggle(!toggle)} className="bg-gray-900 text-white"> <LuMoreVertical /></button>
 
         <div className="">
@@ -50,6 +48,7 @@ const ConversationMenu = ({id,name,participants}:conversation) => {
                         })}
                     </ul>}
                 </div>
+                
             <button
             onClick={handleLeaveGroup}
                  className={`border-2 p-2 flex  w-full bg-gray-500  border-solid text-red-600 font-bold hover:bg-gray-700 hover: rounded-md duration-500`}>
@@ -60,7 +59,13 @@ const ConversationMenu = ({id,name,participants}:conversation) => {
             </ul>
         </div>
     
-    </div>)
+    </div>}
+    
+    
+    </>
+        
+    
+    )
 }
 
 export default ConversationMenu;

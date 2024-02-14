@@ -44,10 +44,13 @@ public class WebSocketAuthInterceptorAdapter implements ChannelInterceptor {
             final String authHeader = accessor.getFirstNativeHeader("Authorization");
             final String jwt;
             final String username;
-            System.out.println(authHeader);
+
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
                 jwt = authHeader.substring(7);
+                System.out.println(jwt);
                 username = jwtService.extractUsername(jwt);
+
                 if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
                     //get the UserDetails object based on the extracted username for validation
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
@@ -57,9 +60,12 @@ public class WebSocketAuthInterceptorAdapter implements ChannelInterceptor {
                         );
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                         accessor.setUser(authenticationToken);
+
+                    }else{
+                        System.out.println("Token expired:" + jwtService.isTokenExpired(jwt));
+
+                        throw new MessagingException("Invalid JWT token");
                     }
-                }else  {
-                    throw new MessagingException("Invalid JWT token");
                 }
             } else {
                 throw new MessagingException("Invalid JWT token or missing");

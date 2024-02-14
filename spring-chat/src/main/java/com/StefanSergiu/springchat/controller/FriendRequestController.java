@@ -38,18 +38,16 @@ public class FriendRequestController {
         UserDTO userRef = UserDTO.from(user);
         userRef.setFriends(false);
         userRef.setRequest(request);
-        template.convertAndSendToUser(
-                receiver.getUsername(), "/queue/friend-requests",
-                userRef);
+
 
         return new ResponseEntity<>(userRef, HttpStatus.OK);
         }
 
 
-    @DeleteMapping("/cancelFriendRequest/{requestId}")
-    public ResponseEntity<Request> cancelFriendRequest(@PathVariable final String requestId){
+    @DeleteMapping("/cancelFriendRequest/{id}")
+    public ResponseEntity<Request> cancelFriendRequest(@PathVariable final String id){
         User user = userService.getLoggedInUser();
-        Request request = requestService.deleteFriendRequest(user, requestId);
+        Request request = requestService.deleteFriendRequest(user, id);
         return new ResponseEntity<>(request, HttpStatus.OK);
 
     }

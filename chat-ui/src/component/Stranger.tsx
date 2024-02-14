@@ -50,6 +50,7 @@ const Stranger: React.FC<StrangerProps> = ({ strangerData }) => {
                   ...prevState,
                   request: null,
                 }));
+                setLoading(false)
     }catch(error){
         console.log(error);
     }

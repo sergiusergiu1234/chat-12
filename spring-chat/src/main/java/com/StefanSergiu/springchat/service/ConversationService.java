@@ -3,10 +3,7 @@ package com.StefanSergiu.springchat.service;
 import com.StefanSergiu.springchat.Document.Conversation;
 import com.StefanSergiu.springchat.Document.Message;
 import com.StefanSergiu.springchat.Document.User;
-import com.StefanSergiu.springchat.dto.ConversationDto;
-import com.StefanSergiu.springchat.dto.MessageDTO;
-import com.StefanSergiu.springchat.dto.NewConversationDTO;
-import com.StefanSergiu.springchat.dto.UserDTO;
+import com.StefanSergiu.springchat.dto.*;
 import com.StefanSergiu.springchat.exception.ConversationNotFoundException;
 import com.StefanSergiu.springchat.exception.MessageNotFoundException;
 import com.StefanSergiu.springchat.exception.UserNotFoundException;
@@ -21,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -33,6 +31,9 @@ public class ConversationService {
     @Autowired
     MessageRespository messageRespository;
 
+
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
     @Transactional
     public Conversation createConversation(NewConversationDTO newConversationDTO){
@@ -80,13 +81,24 @@ public class ConversationService {
 
     }
 
+
     public List<ConversationDto> getConversations(User user){
+
         List<ConversationDto> response = new java.util.ArrayList<>(Collections.emptyList());
         Set<String> conversationList = user.getConversations();
         for(String id: conversationList){
             Conversation conversation = conversationRepository.findById(id)
                     .orElseThrow(()->new ConversationNotFoundException("Conversation not found  with id " + id));
             ConversationDto conversationDto = ConversationDto.from(conversation);
+            if(!conversation.getIsGroupChat()){
+                for(UserDTO participant : conversation.getParticipants()) {
+                    if (!participant.getUsername().equals(user.getUsername())) {
+                        conversationDto.setName(participant.getUsername());
+                    }
+                }
+            }else{
+                conversationDto.setName(conversation.getName());
+            }
             List<Message> messages = messageRespository.findAllById(conversation.getMessageIds());
             conversationDto.setMessages(messages);
            response.add(conversationDto);
@@ -96,10 +108,14 @@ public class ConversationService {
     public Message saveMessage(MessageDTO messageDTO, String conversationId){
         System.out.println(messageDTO.getContent());
         Message newMessage = Message.from(messageDTO);
-        newMessage.setTimestamp(LocalDateTime.now());
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        String localHour = localDateTime.format(formatter);
+        newMessage.setTimestamp(localHour);
 
         messageRespository.save(newMessage);
-        System.out.println(newMessage.getTimestamp());
+
+
         Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(()->
                 new ConversationNotFoundException("Conversation with id "+conversationId +" not found"));
         conversation.addMessage(newMessage.getId());
@@ -135,5 +151,25 @@ public class ConversationService {
                 .filter(userDTO -> userId.equals(userDTO.getId()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Transactional
+    public SeenMessage updateMessage ( SeenMessage seenMessage){
+        Conversation conversation = conversationRepository.findById(seenMessage.getConversationId()).orElseThrow(()->
+                new ConversationNotFoundException("Conversation with id "+ seenMessage.getConversationId() + " not found!"));
+
+        Message message = messageRespository.findById(seenMessage.getMessageId()).orElseThrow(()->
+                new MessageNotFoundException("Message with id  " + seenMessage.getMessageId() + " was not found"));
+
+        //check if the conversation is a group chat.
+        //if it is not, then we check how many people have seen the message
+        if(!conversation.getIsGroupChat() && message.getSeenBy().size() < 2){
+            message.addSeenBy(seenMessage.getUserId());
+        }else if(conversation.getIsGroupChat()){
+            message.addSeenBy(seenMessage.getUserId());
+        }
+
+        messageRespository.save(message);
+        return seenMessage;
     }
 }

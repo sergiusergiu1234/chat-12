@@ -48,7 +48,7 @@ const LoginPage = () => {
   return (
     <div className=" flex flex-col justify-center  bg-gray-200 h-screen w-screen">
       <form onSubmit={handleSubmit} className="flex flex-col ">
-        <div className="flex items-center justify-center flex-col mt-10">
+        <div className="flex items-center justify-center flex-col mt-5">
           <label className="text-xl">Username</label>
           <input
             className=" rounded-xl border-solid border-2 p-2 w-2/6 maxsm:w-5/6 mb-5"
@@ -58,7 +58,7 @@ const LoginPage = () => {
           />
         </div>
 
-        <div className="flex items-center justify-center flex-col mt-10">
+        <div className="flex items-center justify-center flex-col mt-5">
           <label className="text-xl">Password</label>
           <input
             className=" rounded-xl border-solid border-2 p-2 w-2/6 maxsm:w-5/6 mb-5"

@@ -28,10 +28,10 @@ export type authType = {
 //create authentication context
 const AuthenticationContext = createContext<authType>({
   auth: {
-    username: "",
-    accessToken: "",
-    refreshToken: "",
-    userId: "",
+    username: localStorage.getItem('userId') || '',
+    accessToken: localStorage.getItem('accessToken') ||"",
+    refreshToken: localStorage.getItem('refreshToken') || '',
+    userId: localStorage.getItem('userId') || '',
   },
   setAuth: () => {}
 });

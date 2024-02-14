@@ -11,6 +11,8 @@ import AuthenticationContext from './authContext';
 import { axiosPrivate } from '../api/axios';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useRefreshToken from '../hooks/useRefreshToken';
+import useAuth from '../hooks/useAuth';
+import { seenMessage } from '../types/seenMessage.types';
 
 declare module 'stompjs' {
   interface Message {
@@ -27,10 +29,12 @@ interface WebSocketContextProps {
   setActiveConversation : (conversationId: string) => void;
   conversations: conversation[];
   fetchConversations: () => void;
-  leaveConversation: (conversationId:string) => void;
 
+  setFriendRequests : Dispatch<SetStateAction<person[]>>;
+  friendRequests: person[];
   searchVal : string | undefined;
   setSearchVal: Dispatch<SetStateAction<string | undefined>>;
+  fetchFriendRequests: ()=> void
 }
 
 const WebSocketContext = createContext<WebSocketContextProps | undefined>(undefined);
@@ -49,7 +53,7 @@ type WebSocketProviderProps ={
 }
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
-  const { auth} = useContext(AuthenticationContext);
+  const { auth} = useAuth();
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [activeConversation, setActiveConversation] = useState<string>("");
   const [messageHistory, setMessageHistory] = useState<{ [key: string]: message[] }>({});
@@ -58,8 +62,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [friendRequests, setFriendRequests] = useState<person[]>([]);
   const axiosPrivate = useAxiosPrivate();
   const [searchVal, setSearchVal] = useState<string | undefined>(undefined);
-
+  const [unseenCounter, setUnseenCounter] = useState<number>(0);
  
+  
+
+
   const fetchConversations = async () => {
     try{
       const response = axiosPrivate.get('/getConversations',{
@@ -79,7 +86,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   useEffect(() => {
     if(!loading && conversations && auth){
-      
+      fetchFriendRequests();
       console.log("Fetching conversations ...")
       conversations.forEach((conversation) => {
         setMessageHistory((prev) => ({
@@ -112,38 +119,78 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     console.log('Connected to WebSocketss');
     setStompClient(client);
 
-    //friend requests websocket subscription
-      client.subscribe(`/user/queue/friend-requests`,onFriendRequestReceived)
-    
+ 
 
+    //for every conversation 
     conversations.map((conversation) => {
       console.log(conversation.id)
+      //... subscribe to its topic so client can receive messages for that conversation
       client.subscribe(`/topic/messages/${conversation.id}`, onMessageReceived);
+      // ... subscribe to another topic for updating the seen state of messages
+      client.subscribe(`/topic/seen-messages/${conversation.id}`, onSeen)
     });
   };
 
+  
+  //
+  const onSeen = (message: Message) =>{
+    const seenMsg:seenMessage = JSON.parse(message.body);
+    setMessageHistory((prev=>{
+      const conversation = prev[seenMsg.conversationId];
+      if (conversation) {
+        // look for the needed message in conversation
+        const updatedMessages = conversation.map(msg => {
+            if (msg.id === seenMsg.messageId) {
+                // when we find it
+                if (!msg.seenBy?.includes(seenMsg.userId)) {
+                    //we update the seenby attribute
+                    msg.seenBy?.push(seenMsg.userId);
+                }
+            }
+            return msg;
+        });
+
+        // update the conversation's messages with the updated message
+        return { ...prev, [seenMsg.conversationId]: updatedMessages };
+    }
+
+    return prev;
+}));
+};
 
 
   const onError = (err: any) => {
     console.error('WebSocket connection error:', err);
     localStorage.removeItem('access');
-  };
+  }; 
 
   const onMessageReceived = (message: Message) => {
     const destinationParts = message.headers.destination.split('/');
     const destination = destinationParts[destinationParts.length - 1];
+    
     setMessageHistory((prev) => ({
       ...prev,
       [destination]: [...(prev[destination] || []), JSON.parse(message.body)],
     }));
   };
 
-  const onFriendRequestReceived = (message:Message) =>{
-    const friendRequest = JSON.parse(message.body);
-    console.log(friendRequest)
-    setFriendRequests(prev=>([
-      ...prev , friendRequest
-    ]))
+  useEffect(()=>{
+    console.log(activeConversation  , messageHistory[activeConversation] )
+  },[messageHistory])
+  const fetchFriendRequests = async () =>{
+      try{
+        console.log("Fetching requests...")
+        const response = axiosPrivate.get('/getFriendRequests',{
+          headers:{
+            'Authorization': `Bearer ${auth.accessToken}`
+          }
+        });
+        const requestData = (await response).data;
+        setFriendRequests(requestData)
+      }catch(error){
+        console.log(error);
+      }
+   
   }
 
 
@@ -155,14 +202,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const leaveMessage = {
     token: auth.accessToken,
 };
-  const leaveConversation = (conversationId:string)=>{
-    stompClient?.send(`/app/chat/${conversationId}/leave`, {}, JSON.stringify(leaveMessage));
-  }
+  // const leaveConversation = (conversationId:string)=>{
+  //   stompClient?.send(`/app/chat/${conversationId}/leave`, {}, JSON.stringify(leaveMessage));
+  // }
 
   return (
     <WebSocketContext.Provider
       value={{ stompClient, sendMessage, messageHistory, activeConversation, setActiveConversation, 
-        conversations, fetchConversations ,leaveConversation, searchVal, setSearchVal}}
+        conversations, fetchConversations , searchVal, setSearchVal, friendRequests, fetchFriendRequests, setFriendRequests}}
       >
       {children}
     </WebSocketContext.Provider>

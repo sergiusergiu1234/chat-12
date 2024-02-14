@@ -37,7 +37,7 @@ const ConversationRoom:React.FC<ConversationData> = ({conversation}) => {
             senderName: auth.username,
             content: value,
             senderId: auth.userId,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 
@@ -68,7 +68,7 @@ const ConversationRoom:React.FC<ConversationData> = ({conversation}) => {
     }
 
     return (<>
-        <div className={`${activeConversation ? 'flex flex-row bg-gray-600 w-full h-10' : 'hidden'}  `}>
+        <div className={`${activeConversation ? 'flex flex-row bg-gradient-to-r from-slate-800 to-slate-900 w-full h-14' : 'hidden'}  `}>
             <BackButton mobileOnly={true} onCLick={()=>setActiveConversation('')}/>
             <label className="text-white justify-self-end">{conversation?.name}</label>
             {conversation && <ConversationMenu id={conversation?.id} name={conversation?.name} participants={conversation?.participants} isGroupChat={false} messages={[]}/>}
@@ -76,7 +76,7 @@ const ConversationRoom:React.FC<ConversationData> = ({conversation}) => {
         </div>
         <ul ref={messageContainerRef} className="w-4/6 flex flex-col items-center h-5/6 overflow-y-auto custom-scrollbar" >
             {messages?.map((message: message) => (
-                <Message key={message.id} messageData={message} isGroupChat={conversation?.isGroupChat || false}/>
+                <Message key={message.id} messageData={message} conversationId={conversation?.id || ''} isGroupChat={conversation?.isGroupChat || false}/>
             ))}
         </ul>
 

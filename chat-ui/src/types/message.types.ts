@@ -3,5 +3,6 @@ export type message ={
     senderId: string,
     senderName: string,
     content:string,
-    timestamp: string
+    timestamp: string,
+    seenBy?: string[]
 }

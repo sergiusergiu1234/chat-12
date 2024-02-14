@@ -11,7 +11,7 @@ const ConversationsList = () => {
   const { setActiveConversation, conversations, fetchConversations , searchVal } =useWebSocket();
 
   useEffect(() => {
-    fetchConversations()   
+    fetchConversations();   
   }, []);
 
   const [filteredConversations, setFilteredConversations] = useState<conversation[]>(conversations);

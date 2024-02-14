@@ -48,6 +48,10 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
             registry.addEndpoint("/ws","/chat")
                     .setAllowedOriginPatterns("*")
                     .withSockJS();
+
+            registry.addEndpoint("/seen-messages")
+                    .setAllowedOriginPatterns("*")
+                    .withSockJS();
         }
 
         @Override

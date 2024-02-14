@@ -1,9 +1,11 @@
 package com.StefanSergiu.springchat.controller;
 
 import com.StefanSergiu.springchat.Document.LeaveMessage;
+import com.StefanSergiu.springchat.Document.Message;
 import com.StefanSergiu.springchat.Document.User;
 import com.StefanSergiu.springchat.config.JwtService;
 import com.StefanSergiu.springchat.dto.MessageDTO;
+import com.StefanSergiu.springchat.dto.SeenMessage;
 import com.StefanSergiu.springchat.repository.UserRepository;
 import com.StefanSergiu.springchat.service.ConversationService;
 import com.StefanSergiu.springchat.service.UserService;
@@ -37,11 +39,13 @@ public class WebSocketController {
     @Autowired
     JwtService jwtService;
 
+
+
     @MessageMapping("/chat/{conversationId}")
     @SendTo("/topic/messages/{conversationId}")
-    public MessageDTO handleReceivedMessage(@DestinationVariable String conversationId,@Payload MessageDTO message){
-        conversationService.saveMessage(message,conversationId);
-        return message;
+    public Message handleReceivedMessage(@DestinationVariable String conversationId, @Payload MessageDTO message){
+       return conversationService.saveMessage(message,conversationId);
+
     }
 
     @MessageMapping("/chat/{conversationId}/leave")
@@ -66,6 +70,11 @@ public class WebSocketController {
        }
     }
 
+    @MessageMapping("/chat/seen-messages/{conversationId}")
+    @SendTo("/topic/seen-messages/{conversationId}")
+    public SeenMessage handleSeenMessage(@DestinationVariable String conversationId, @Payload SeenMessage seenMessage) {
 
+        return conversationService.updateMessage(seenMessage);
+    }
 
 }

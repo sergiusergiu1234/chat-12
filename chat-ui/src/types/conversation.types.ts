@@ -7,5 +7,5 @@ export type conversation ={
     participants: person[],
     isGroupChat: boolean;
     messages:message[]
-    //timestamp: string
+   
 }

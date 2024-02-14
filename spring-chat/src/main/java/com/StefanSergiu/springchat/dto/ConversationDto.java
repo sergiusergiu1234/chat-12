@@ -26,11 +26,7 @@ public class ConversationDto {
         conversationDto.setId(conversation.getId());
         conversationDto.setParticipants(conversation.getParticipants());
         conversationDto.setIsGroupChat(conversation.getIsGroupChat());
-        if(!conversation.getIsGroupChat()){
-            conversationDto.setName(conversation.getParticipants().get(0).getUsername());
-        }else{
-            conversationDto.setName(conversation.getName());
-        }
+
 
         return conversationDto;
     }

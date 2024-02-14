@@ -15,7 +15,7 @@ const ChatRoom = () => {
         <div className={`flex flex-col w-1/4 min-w-80 h-screen sticky ${activeConversation ? 'maxsm:hidden': 'maxsm:w-full'}`}>
           <Navbar />
           {/* Conversation List */}
-          <div className={`h-full bg-gray-600 flex flex-col overflow-y-auto custom-scrollbar  ${activeConversation ? 'maxsm:hidden' : 'maxsm:w-full'} `}>
+          <div className={`h-full bg-gradient-to-r from-slate-900 to-slate-800 flex flex-col overflow-y-auto custom-scrollbar  ${activeConversation ? 'maxsm:hidden' : 'maxsm:w-full'} `}>
             <ConversationsList />
           </div>
         </div>

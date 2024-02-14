@@ -4,7 +4,7 @@ import { BiSolidContact } from "react-icons/bi";
 import { RiUserSearchFill } from "react-icons/ri";
 import { BiLogOutCircle } from "react-icons/bi";
 import { FaSearch } from "react-icons/fa";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import NewConversation from "../pages/NewGroup";
 import { useNavigate } from "react-router-dom";
 import AuthenticationContext from "../context/authContext";
@@ -19,10 +19,13 @@ const Navbar = () => {
   );
 
   const [toggle, setToggle] = useState(false);
-  const {searchVal,setSearchVal} = useWebSocket();
+  const {searchVal,setSearchVal, friendRequests} = useWebSocket();
   const { setAuth } = useAuth();
   const navigate = useNavigate();
  
+  useEffect(()=>{
+    console.log("Friend reuqests ",friendRequests)
+  },[friendRequests])
 
 
   const handleLogout = () => {
@@ -36,7 +39,7 @@ const Navbar = () => {
 
   const toggleStyle = `text-3xl flex flex-wrap content-center justify-center w-11 text-white `;
   return (
-    <div ref={ref} className="bg-gray-600 h-max  flex flex-row w-full ">
+    <div ref={ref} className="bg-gradient-to-r from-slate-900 to-slate-800 h-max  flex flex-row w-full ">
       <button
         className={
           !toggle
@@ -85,8 +88,10 @@ const Navbar = () => {
             className=" justify-center text-center py-2 flex items-center  w-56  border-solid text-white font-bold hover:bg-gray-700 hover: rounded-md  duration-500"
             onClick={()=> navigate('/friend-requests')}
           >
-            Friend requests
+            Friend requests 
+            {friendRequests.length !== 0 && <div className="ml-2 hover:cursor-pointer bg-red-700 rounded-3xl w-5 h-5 flex items-center justify-center"><label className="hover:cursor-pointer">{friendRequests.length}</label></div>}
           </button>
+         
         </li>
         <li>
           <button

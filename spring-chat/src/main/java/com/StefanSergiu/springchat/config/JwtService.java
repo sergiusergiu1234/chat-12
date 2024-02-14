@@ -29,7 +29,7 @@ public class JwtService {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
-                .expiresAt(now.plus(20, ChronoUnit.SECONDS))
+                .expiresAt(now.plus(5, ChronoUnit.HOURS))
                 .subject(userDetails.getUsername())
                 .build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -39,7 +39,7 @@ public class JwtService {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
-                .expiresAt(now.plus(1, ChronoUnit.DAYS))
+                .expiresAt(now.plus(7, ChronoUnit.DAYS))
                 .subject(userDetails.getUsername())
                 .build();
         return this.refreshTokenEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
