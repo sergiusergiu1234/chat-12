@@ -8,11 +8,11 @@ refresh-token:
 spring:
   profiles:
     active: dev
-#data:
-#  mongodb:
-##   uri: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/?authSource=${MONGODB_DB}&replicaSet=${MONGODB_RS}
-#    uri: mongodb://localhost:27017/chats
 
+  data:
+    mongodb:
+      database: chats
+      uri: mongodb+srv://${MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_CLUSTER}.mongodb.net/chats
 logging:
   level:
     org.springframework.security: DEBUG

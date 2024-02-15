@@ -38,7 +38,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
     @Configuration
     @EnableWebSocketMessageBroker
     @RequiredArgsConstructor
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000","https://chat-12.vercel.app"})
     @Order(HIGHEST_PRECEDENCE + 99)
     public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 

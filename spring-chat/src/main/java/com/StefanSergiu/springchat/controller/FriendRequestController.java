@@ -18,7 +18,7 @@ import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000","https://chat-12.vercel.app"})
 public class FriendRequestController {
 
     private final UserService userService;
