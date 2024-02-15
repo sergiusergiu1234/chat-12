@@ -1,18 +1,13 @@
-
-access-token:
-  private: ${ACCESS_TOKEN_PRIVATE_KEY_PATH}
-  public: ${ACCESS_TOKEN_PUBLIC_KEY_PATH}
-refresh-token:
-  private: ${REFRESH_TOKEN_PRIVATE_KEY_PATH}
-  public: ${REFRESH_TOKEN_PUBLIC_KEY_PATH}
-spring:
-  profiles:
-    active: dev
-
-  data:
-    mongodb:
-      database: chats
-      uri: mongodb+srv://${MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_CLUSTER}.mongodb.net/chats
-logging:
-  level:
-    org.springframework.security: DEBUG
+#
+#access-token:
+#  private: ${ACCESS_TOKEN_PRIVATE_KEY_PATH}
+#  public: ${ACCESS_TOKEN_PUBLIC_KEY_PATH}
+#refresh-token:
+#  private: ${REFRESH_TOKEN_PRIVATE_KEY_PATH}
+#  public: ${REFRESH_TOKEN_PUBLIC_KEY_PATH}
+#
+#
+#  data:
+#    mongodb:
+#      database: chats
+#      uri: mongodb+srv://${MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_CLUSTER}.mongodb.net/chats
